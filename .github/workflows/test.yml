@@ -19,6 +19,25 @@ jobs:
           solana-cli-version: '1.18.11'
           node-version: '20.18.0'
           features: 'anchor-test'
+      - name: Fix Solana CLI installation
+        run: |
+          # Fix curl SSL issues and reinstall Solana CLI
+          sudo apt-get update
+          sudo apt-get install -y curl ca-certificates wget
+          
+          # Try to install Solana CLI
+          if ! sh -c "$(curl -sSfL https://release.solana.com/v1.18.11/install)"; then
+            echo "curl method failed, trying wget..."
+            wget -O - https://release.solana.com/v1.18.11/install | sh
+          fi
+          
+          # Ensure PATH is set correctly
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          
+          # Verify installation
+          solana --version
+          solana-keygen --version
       - run: cargo fmt -- --check && cargo clippy
       - run: cargo test
       - run: anchor build && npm ci && npm run test -- run
