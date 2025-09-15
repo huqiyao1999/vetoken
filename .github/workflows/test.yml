@@ -13,28 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Fix Solana CLI installation
+      - name: Solana CLI installation
         run: |
-          # Fix curl SSL issues and install Solana CLI
-          sudo apt-get update
-          sudo apt-get install -y curl ca-certificates wget
-          
-          # Create Solana install directory
-          mkdir -p $HOME/.local/share/solana/install/active_release/bin
-          
-          # Download and install Solana CLI using wget (more reliable)
-          echo "Installing Solana CLI using wget..."
           wget -O solana-install-init https://github.com/solana-labs/solana/releases/download/v1.18.11/solana-install-init-x86_64-unknown-linux-gnu
           chmod +x solana-install-init
           ./solana-install-init v1.18.11
-          
-          # Ensure PATH is set correctly
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          
-          # Verify installation
-          solana --version
-          solana-keygen --version
       - uses: metadaoproject/anchor-test@v2
         with:
           anchor-version: '0.29.0'
